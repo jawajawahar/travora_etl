@@ -286,7 +286,8 @@ class Stay:
 
 
 def choose_lodging(session, days, budget_lkr: float,
-                   party_size: int = 1, radius_km: float = 25.0) -> tuple[list[Stay], dict]:
+                   party_size: int = 1, radius_km: float = 25.0,
+                   by_id: Optional[dict] = None) -> tuple[list[Stay], dict]:
     """
     Pick one property per night, near the last stop of that day.
 
@@ -305,13 +306,17 @@ def choose_lodging(session, days, budget_lkr: float,
             unassigned.append(day.day)
             continue
         anchor = day.stops[-1]
+        c = by_id.get(anchor.poi_id) if by_id else None
+        anchor_lat = float(getattr(c, "lat", 0.0) or getattr(anchor, "lat", 0.0) or 0.0)
+        anchor_lon = float(getattr(c, "lon", 0.0) or getattr(anchor, "lon", 0.0) or 0.0)
 
         try:
             rows = [dict(r) for r in session.run(
                 NEARBY_ACCOMMODATION,
-                lat=float(getattr(anchor, "lat", 0.0) or 0.0),
-                lon=float(getattr(anchor, "lon", 0.0) or 0.0),
+                lat=anchor_lat,
+                lon=anchor_lon,
                 radius_m=radius_km * 1000.0, limit=25)]
+
         except Exception as e:                          # noqa: BLE001
             log.warning("accommodation lookup failed for day %d: %s", day.day, e)
             rows = []

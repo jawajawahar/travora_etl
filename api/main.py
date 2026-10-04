@@ -576,77 +576,80 @@ def log_parse(entry: ParseLogEntry):
 
 @app.post("/api/v1/itinerary")
 def create_itinerary(req: ItineraryRequest):
-    trip = req.to_trip()
+    try:
+        trip = req.to_trip()
 
-    completion = STATE["completion"] if req.use_llm else None
-    pipeline = TravoraPipeline(
-        session=None,
-        preference=PreferenceAgent(complete=completion),
-        sustainability=SustainabilityAgent(),
-        solver_config=SolverConfig(max_slots_per_day=req.max_slots_per_day),
-    )
+        completion = STATE["completion"] if req.use_llm else None
+        pipeline = TravoraPipeline(
+            session=None,
+            preference=PreferenceAgent(complete=completion),
+            sustainability=SustainabilityAgent(),
+            solver_config=SolverConfig(max_slots_per_day=req.max_slots_per_day),
+        )
 
-    from solver.logistics import build_legs, emissions_summary, choose_lodging, retime
-    # Road routing can be switched off (tests, or offline demos); legs are
-    # then estimated and marked as such.
-    osrm = OSRM_URL if os.getenv("TRAVORA_ROAD_ROUTING", "1") == "1" else None
+        from solver.logistics import build_legs, emissions_summary, choose_lodging, retime
+        # Road routing can be switched off (tests, or offline demos); legs are
+        # then estimated and marked as such.
+        osrm = OSRM_URL if os.getenv("TRAVORA_ROAD_ROUTING", "1") == "1" else None
 
-    plans = []
-    with _session() as session:
-        pipeline.retriever.session = session
-        result = pipeline.run(trip, alternatives=req.alternatives)
+        plans = []
+        with _session() as session:
+            pipeline.retriever.session = session
+            result = pipeline.run(trip, alternatives=req.alternatives)
 
-        if result.solver.feasible:
-            by_id = {c.poi_id: c for c in pipeline.retriever._last_candidates}
-            all_plans = [result.solver.itinerary, *result.solver.alternatives]
-            photos = _stop_photos(session, {s.poi_id for it in all_plans for s in it.stops})
-            for it in all_plans:
-                stops_by_day = [d.stops for d in it.days]
-                legs = build_legs(stops_by_day, by_id, start=(trip.start_lat, trip.start_lon),
-                                  start_name=req.start_name, osrm_url=osrm,
-                                  party_size=trip.party_size)
-                timing = retime(stops_by_day, legs, by_id)
-                # Accommodation is chosen after the stops are fixed: a hotel
-                # changes where the traveller sleeps, not which places are reachable.
-                stays, lodging = choose_lodging(
-                    session, it.days, trip.budget_lkr * 0.45, trip.party_size)
-                plans.append(_plan_payload(it, result, legs,
-                                           emissions_summary(legs, trip.party_size,
-                                                             days=len(it.days),
-                                                             place_mean=it.s_sust),
-                                           stays, lodging, photos, by_id, legs, timing))
+            if result.solver.feasible:
+                by_id = {c.poi_id: c for c in pipeline.retriever._last_candidates}
+                all_plans = [result.solver.itinerary, *result.solver.alternatives]
+                photos = _stop_photos(session, {s.poi_id for it in all_plans for s in it.stops})
+                for it in all_plans:
+                    stops_by_day = [d.stops for d in it.days]
+                    legs = build_legs(stops_by_day, by_id, start=(trip.start_lat, trip.start_lon),
+                                      start_name=req.start_name, osrm_url=osrm,
+                                      party_size=trip.party_size)
+                    timing = retime(stops_by_day, legs, by_id)
+                    # Accommodation is chosen after the stops are fixed: a hotel
+                    # changes where the traveller sleeps, not which places are reachable.
+                    stays, lodging = choose_lodging(
+                        session, it.days, trip.budget_lkr * 0.45, trip.party_size, by_id=by_id)
+                    plans.append(_plan_payload(it, result, legs,
+                                               emissions_summary(legs, trip.party_size,
+                                                                 days=len(it.days),
+                                                                 place_mean=it.s_sust),
+                                               stays, lodging, photos, by_id, legs, timing))
 
-    audit = result.audit.model_dump()
-    res = result.solver
+        audit = result.audit.model_dump()
+        res = result.solver
 
-    if not res.feasible:
-        # 422: the request was well formed but no plan satisfies it. The
-        # conflict and the suggestion are the useful part of this response.
-        return JSONResponse(status_code=422, content={
-            "feasible": False,
+        if not res.feasible:
+            # 422: the request was well formed but no plan satisfies it. The
+            # conflict and the suggestion are the useful part of this response.
+            return JSONResponse(status_code=422, content={
+                "feasible": False,
+                "request_id": result.request_id,
+                "conflict": res.conflict.conflict.value if res.conflict else "unknown",
+                "detail": res.conflict.detail if res.conflict else "",
+                "binding_constraint": res.conflict.binding_constraint if res.conflict else None,
+                "suggestion": res.conflict.suggestion if res.conflict else None,
+                "audit": audit,
+            })
+
+        return {
+            "feasible": True,
             "request_id": result.request_id,
-            "conflict": res.conflict.conflict.value if res.conflict else "unknown",
-            "detail": res.conflict.detail if res.conflict else "",
-            "binding_constraint": res.conflict.binding_constraint if res.conflict else None,
-            "suggestion": res.conflict.suggestion if res.conflict else None,
+            **plans[0],
+            "alternatives": plans[1:],
             "audit": audit,
-        })
+            "data_provenance": {
+                "poi_source": "OpenStreetMap (ODbL) + SLTDA + Wikidata",
+                "accommodation_source": "SLTDA registered accommodation",
+                "note": "Opening hours and entry fees are largely imputed from "
+                        "category defaults; per-stop flags mark which are real.",
+            },
+        }
+    except Exception as e:
+        log.exception("Error in create_itinerary")
+        return JSONResponse(status_code=500, content={"detail": f"Failed to plan itinerary: {str(e)}"})
 
-    return {
-        "feasible": True,
-        "request_id": result.request_id,
-        **plans[0],
-        # Each alternative has the same shape as the main plan, so a client can
-        # switch options by replacing itinerary/accommodation/transport.
-        "alternatives": plans[1:],
-        "audit": audit,
-        "data_provenance": {
-            "poi_source": "OpenStreetMap (ODbL) + SLTDA + Wikidata",
-            "accommodation_source": "SLTDA registered accommodation",
-            "note": "Opening hours and entry fees are largely imputed from "
-                    "category defaults; per-stop flags mark which are real.",
-        },
-    }
 
 
 def _stop_photos(session, ids: set[str]) -> dict[str, dict]:
