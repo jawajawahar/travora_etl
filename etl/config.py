@@ -49,9 +49,10 @@ USER_AGENT = os.getenv(
 )
 
 # --- Neo4j ---
-NEO4J_URI = os.getenv("NEO4J_URI", "")
-NEO4J_USER = os.getenv("NEO4J_USER", os.getenv("NEO4J_USERNAME", "neo4j"))
-NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "")
+NEO4J_URI = os.getenv("NEO4J_URI", "neo4j+s://3c918eab.databases.neo4j.io")
+NEO4J_USER = os.getenv("NEO4J_USER", os.getenv("NEO4J_USERNAME", "3c918eab"))
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "6ZNqkKFHAw2EpkAibSTGRBrvwqc-35urLSDN3VvoWpw")
+
 
 # --- Fallback travel model (used only when OSRM is unavailable) ---
 FALLBACK_AVG_KMH = 35.0        # Sri Lankan road conditions
