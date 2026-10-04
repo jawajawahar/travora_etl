@@ -49,11 +49,10 @@ USER_AGENT = os.getenv(
 )
 
 # --- Neo4j ---
-NEO4J_URI = (os.getenv("NEO4J_URI") or "").strip() or "neo4j+s://3c918eab.databases.neo4j.io"
-_u = (os.getenv("NEO4J_USER") or os.getenv("NEO4J_USERNAME") or "").strip()
-NEO4J_USER = _u if (_u and _u != "neo4j") else "3c918eab"
-_p = (os.getenv("NEO4J_PASSWORD") or "").strip()
-NEO4J_PASSWORD = _p if (len(_p) > 5) else "6ZNqkKFHAw2EpkAibSTGRBrvwqc-35urLSDN3VvoWpw"
+NEO4J_URI = "neo4j+s://3c918eab.databases.neo4j.io"
+NEO4J_USER = "3c918eab"
+NEO4J_PASSWORD = "6ZNqkKFHAw2EpkAibSTGRBrvwqc-35urLSDN3VvoWpw"
+
 
 
 
