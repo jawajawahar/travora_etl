@@ -51,15 +51,17 @@ async def lifespan(app: FastAPI):
     # untestable without a live database.
     owns_driver = False
     if STATE.get("driver") is None:
-        if not NEO4J_URI or not NEO4J_PASSWORD:
+        import etl.config as cfg
+        if not cfg.NEO4J_URI or not cfg.NEO4J_PASSWORD:
             log.error("NEO4J_URI / NEO4J_PASSWORD not set; requests will fail")
         else:
             from neo4j import GraphDatabase
             STATE["driver"] = GraphDatabase.driver(
-                NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD),
+                cfg.NEO4J_URI, auth=(cfg.NEO4J_USER, cfg.NEO4J_PASSWORD),
                 max_connection_pool_size=20)
             owns_driver = True
-            log.info("Neo4j driver ready")
+            log.info("Neo4j driver ready for %s", cfg.NEO4J_USER)
+
 
     # Built once: model discovery and key-pool loading are startup costs, not
     # per-request ones.
@@ -116,10 +118,18 @@ class ItineraryRequest(BaseModel):
 
 
 def _session():
-    if STATE["driver"] is None:
+    if STATE.get("driver") is None:
+        import etl.config as cfg
+        if cfg.NEO4J_URI and cfg.NEO4J_PASSWORD:
+            from neo4j import GraphDatabase
+            STATE["driver"] = GraphDatabase.driver(
+                cfg.NEO4J_URI, auth=(cfg.NEO4J_USER, cfg.NEO4J_PASSWORD),
+                max_connection_pool_size=20)
+    if STATE.get("driver") is None:
         raise HTTPException(503, "Knowledge graph unavailable. Check NEO4J_URI "
                                  "and NEO4J_PASSWORD.")
     return STATE["driver"].session()
+
 
 
 # ---------------------------------------------------------------------------
