@@ -1,0 +1,10 @@
+PyYAML>=6.0
+neo4j>=5.14
+numpy>=1.24
+pandas>=2.0
+pyarrow>=14.0
+pydantic>=2.0
+pytest>=7.4
+rapidfuzz>=3.0
+requests>=2.31
+shapely>=2.0

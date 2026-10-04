@@ -1,0 +1,10 @@
+gate,name,observed,threshold,passed
+T1,Provenance: every id exists in the graph,0 unknown ids,0,True
+T4,Catalogue coverage,4.7%,>= 40.0%,False
+T5,Gini index of recommendation frequency,0.969,<= 0.6,False
+T6,Distinct-plan rate,47.2%,>= 90.0%,False
+T2,Budget perturbation changes the itinerary,75%,>= 80.0%,False
+T3,Interest sensitivity (culture vs beach overlap),0%,<= 30.0%,True
+T9,Seed reproducibility,identical,identical,True
+T10,Districts reached across the query set,15,>= 10,True
+T8,Fake-id injection is rejected by the contract,rejected,rejected,True

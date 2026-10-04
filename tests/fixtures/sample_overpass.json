@@ -1,0 +1,209 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API fixture for Travora tests",
+  "elements": [
+    {
+      "type": "node",
+      "id": 1001,
+      "lat": 7.957,
+      "lon": 80.7603,
+      "tags": {
+        "name": "Sigiriya Rock Fortress",
+        "historic": "archaeological_site",
+        "opening_hours": "Mo-Su 07:00-17:30",
+        "charge": "5000 LKR",
+        "wikidata": "Q189701",
+        "wikipedia": "en:Sigiriya"
+      }
+    },
+    {
+      "type": "way",
+      "id": 2001,
+      "center": {
+        "lat": 7.9572,
+        "lon": 80.7605
+      },
+      "tags": {
+        "name": "Sigiriya Rock  Fortress",
+        "historic": "ruins",
+        "tourism": "attraction"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1002,
+      "lat": 6.3719,
+      "lon": 81.5089,
+      "tags": {
+        "name": "Yala National Park",
+        "boundary": "protected_area",
+        "protect_class": "2",
+        "opening_hours": "06:00-18:00"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1003,
+      "lat": 6.0535,
+      "lon": 80.221,
+      "tags": {
+        "name:en": "Galle Fort",
+        "name": "ගාල්ල කොටුව",
+        "historic": "fort",
+        "heritage": "1"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1004,
+      "lat": 6.8667,
+      "lon": 81.0466,
+      "tags": {
+        "name": "Nine Arches Bridge",
+        "man_made": "tower",
+        "tourism": "attraction",
+        "opening_hours": "24/7"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1005,
+      "lat": 9.6615,
+      "lon": 80.0255,
+      "tags": {
+        "name": "Nallur Kandaswamy Temple",
+        "amenity": "place_of_worship",
+        "opening_hours": "Mo-Fr 05:00-12:00; Sa-Su 05:00-21:00",
+        "fee": "no",
+        "wikidata": "Q6960014"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1006,
+      "lat": 8.5874,
+      "lon": 81.2152,
+      "tags": {
+        "name": "Marble Beach",
+        "natural": "beach"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1007,
+      "lat": 6.8094,
+      "lon": 80.4992,
+      "tags": {
+        "name": "Bambarakanda Falls",
+        "waterway": "waterfall"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1008,
+      "lat": 8.981,
+      "lon": 79.9044,
+      "tags": {
+        "name": "Mannar Baobab Tree",
+        "natural": "wood",
+        "tourism": "attraction"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1009,
+      "lat": 6.9497,
+      "lon": 80.7891,
+      "tags": {
+        "name": "Horton Plains",
+        "leisure": "nature_reserve",
+        "opening_hours": "06:00-16:00",
+        "charge": "20 USD"
+      }
+    },
+    {
+      "type": "node",
+      "id": 9001,
+      "lat": 6.9271,
+      "lon": 79.8612,
+      "tags": {
+        "name": "Bus stop 138",
+        "highway": "bus_stop"
+      }
+    },
+    {
+      "type": "node",
+      "id": 9002,
+      "lat": 6.9271,
+      "lon": 79.8612,
+      "tags": {
+        "historic": "monument"
+      }
+    },
+    {
+      "type": "node",
+      "id": 9003,
+      "lat": 13.0827,
+      "lon": 80.2707,
+      "tags": {
+        "name": "Chennai Museum",
+        "tourism": "museum"
+      }
+    },
+    {
+      "type": "node",
+      "id": 9004,
+      "lat": 7.2906,
+      "lon": 80.6337,
+      "tags": {
+        "name": "AB",
+        "tourism": "attraction"
+      }
+    },
+    {
+      "type": "way",
+      "id": 2002,
+      "tags": {
+        "name": "No Coordinates Place",
+        "historic": "ruins"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1010,
+      "lat": 7.2955,
+      "lon": 80.641,
+      "tags": {
+        "name": "Temple of the Sacred Tooth Relic",
+        "amenity": "place_of_worship",
+        "historic": "temple",
+        "opening_hours": "05:30-20:00",
+        "charge": "2000 LKR",
+        "wikidata": "Q1194094"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1011,
+      "lat": 7.9403,
+      "lon": 81.0188,
+      "tags": {
+        "name": "Polonnaruwa Ancient City",
+        "historic": "archaeological_site",
+        "heritage": "1",
+        "opening_hours": "07:00-18:00"
+      }
+    },
+    {
+      "type": "node",
+      "id": 1012,
+      "lat": 6.1241,
+      "lon": 81.1185,
+      "tags": {
+        "name": "Bundala National Park",
+        "boundary": "protected_area",
+        "protect_class": "2"
+      }
+    }
+  ]
+}

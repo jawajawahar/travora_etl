@@ -1,0 +1,157 @@
+# Travora sustainability model configuration.
+#
+# Version-controlled and auditable: every weight used to compute S_sust is here
+# rather than buried in code, so the model can be inspected, cited in Chapter 3,
+# and swept during the weight-sensitivity analysis.
+
+version: 1
+updated: 2026-08-17
+
+# ---------------------------------------------------------------------------
+# Accommodation category scores (1.0 = most sustainable)
+#
+# Justification: SLTDA states that the Home Stay category exists "to empower
+# local community by creating tourism related employment and distributing
+# economic benefits through tourism", to "expand tourism related activities to
+# rural and interior areas", and to support "sustainable and responsible
+# development of Eco and rural tourism". The registration categories are
+# therefore a national-authority instrument of sustainable tourism policy, not
+# merely a size classification.
+#
+# The ordering below is corroborated independently by median room counts in the
+# SLTDA register itself (see the Spearman check reported by extract_sltda.py):
+# Home Stay 3 rooms, Bungalow 4, Guest House 9, Boutique Hotel 16,
+# Tourist Hotel 28, Classified Hotel 60.
+# ---------------------------------------------------------------------------
+accommodation_category:
+  "Home Stay Units":              1.00   # family-occupied, max 4 guest rooms, host interaction
+  "Heritage Homes":               0.90   # >100 years old, adaptive reuse of existing building
+  "Heritage Bungalows":           0.85
+  "Rented Homes":                 0.80
+  "Bangalows":                    0.75   # SLTDA spelling retained for exact join
+  "Rented Apartments":            0.70
+  "Guest Houses":                 0.65   # small/medium, typically owner-operated
+  "Boutique Villas":              0.45
+  "Boutique Hotels":              0.40
+  "Tourist Hotels":               0.30   # unclassified hotels
+  "Classified Hotels( 1-5 Star)": 0.20   # SLTDA spelling retained for exact join
+_default_category_score: 0.50            # unknown category: neutral, never optimistic
+
+# ---------------------------------------------------------------------------
+# Size component. Per-guest resource intensity rises with property size.
+# Scored on a log scale because the difference between 3 and 10 rooms matters
+# far more than between 300 and 307.
+# ---------------------------------------------------------------------------
+size:
+  rooms_floor: 1
+  rooms_ceiling: 300      # values above this are clipped
+  log_base: 10
+
+# ---------------------------------------------------------------------------
+# Grade schemes. SLTDA uses three different schemes depending on category, so
+# each is mapped separately. Grade contributes only a small adjustment: a higher
+# grade generally means more amenities and higher resource use, but it also
+# means better management, so the effect is deliberately small.
+# ---------------------------------------------------------------------------
+grade_adjustment:
+  # Classified hotels (star rating)
+  "ONE": 0.04
+  "TWO": 0.02
+  "THREE": 0.00
+  "FOUR": -0.03
+  "FIVE": -0.06
+  # Guest houses
+  "A": 0.00
+  "B": 0.02
+  "C": 0.04
+  # Home stays, bungalows, rented units
+  "STANDARD": 0.04
+  "SUPERIOR": 0.00
+  "DELUXE": -0.04
+
+# ---------------------------------------------------------------------------
+# Weights combining the accommodation components into one 0-1 score.
+# Must sum to 1.0.
+# ---------------------------------------------------------------------------
+accommodation_weights:
+  category: 0.65
+  size: 0.35
+
+# ---------------------------------------------------------------------------
+# POI sustainability components.
+#
+# protect_class is the IUCN protected-area category carried in OSM. Strict
+# reserves are ecologically sensitive: visiting them carries higher impact and
+# they should be weighted down for high-volume itineraries, NOT because they are
+# undesirable but because carrying capacity is lower.
+# ---------------------------------------------------------------------------
+poi_protect_sensitivity:
+  "1a": 1.00    # strict nature reserve - highest sensitivity
+  "1b": 0.95    # wilderness area
+  "2":  0.70    # national park
+  "3":  0.55    # natural monument
+  "4":  0.50    # habitat/species management area
+  "5":  0.30    # protected landscape
+  "6":  0.25    # sustainable use of natural resources
+_default_protect_sensitivity: 0.0   # not a protected area
+
+# ---------------------------------------------------------------------------
+# Rail accessibility. Train is the lowest-emission intercity mode in Sri Lanka.
+# A POI within walking or short-transfer distance of a station can be reached
+# sustainably, which feeds the transport component directly.
+# ---------------------------------------------------------------------------
+rail:
+  excellent_km: 2.0     # walkable from the station
+  good_km: 8.0          # short tuk-tuk or bus transfer
+  moderate_km: 25.0     # feasible connection
+  # beyond moderate_km, rail access scores 0
+
+# ---------------------------------------------------------------------------
+# Journey emissions. kg CO2e, direct (tank-to-wheel). Every value is read from
+# a document in data/references/emission_factors/ (see SOURCES.md there).
+#
+# No official Sri Lanka-specific per passenger-km factors exist, so each mode
+# has a LOW / CENTRAL / HIGH value bounded by South Asian (India GHG Program,
+# 2015) and UK (DESNZ 2024) factors. Results are reported under all three.
+#
+#   basis: pkm - per passenger-km (public transport: already shared)
+#          vkm - per vehicle-km, divided among the people in the vehicle
+# ---------------------------------------------------------------------------
+transport_emissions:
+  walk:        {basis: pkm, low: 0.0, central: 0.0, high: 0.0}
+  train:       {basis: pkm, low: 0.00794, central: 0.022, high: 0.03546}
+    # low: India GHG Program 2015 rail, p.17 (non-suburban). high: DESNZ 2024
+    # national rail. Sri Lankan rail is diesel and crowded, so it lies between.
+  bus:         {basis: pkm, low: 0.015161, central: 0.02717, high: 0.10846}
+    # low: India GHG Program/WRI 2015 road, p.12. central: DESNZ 2024 coach
+    # (intercity, well loaded). high: DESNZ 2024 average local bus (UK loads).
+  tuktuk:      {basis: vkm, capacity: 3, low: 0.1135, central: 0.1135, high: 0.1135}
+    # India GHG Program/WRI 2015 road, p.11, three-wheeler petrol. DESNZ has no
+    # three-wheeler category. Uncertainty enters through occupancy instead.
+  car_private: {basis: vkm, capacity: 4, low: 0.14262, central: 0.16691, high: 0.22472}
+    # DESNZ 2024 small / average / large car, unknown fuel. The traveller's
+    # party in its own hired car.
+  car_shared:  {basis: vkm, capacity: 4, occupancy: 4, low: 0.14262, central: 0.16691, high: 0.22472}
+    # Same vehicle factors, shared with other travellers (full car assumed).
+
+journey:
+  # Weight of the journey in the trip score; the remaining 0.60 is the places.
+  # 0.40 is the weight transport already had in the original place-level score,
+  # so its importance is kept and only moved to where it is measured.
+  lambda: 0.40
+  # Reference daily emissions: the most travel the planner's own rules allow in
+  # a day (4 h transfer + 2.5 h between stops = 6.5 h at 35 km/h = 227.5 km),
+  # alone in an average car. S_journey = 1 - min(1, e / e_ref), so 0 is the worst
+  # day the planner permits and 1 is no motorised travel.
+  reference_km_per_day: 227.5
+  reference_mode: car_private
+
+# ---------------------------------------------------------------------------
+# Lambda weights for the sustainability cost terms in
+#   S_sust(x) = 1 - l1*C_transport - l2*C_acc - l3*C_crowd
+# Must sum to 1.0. Swept during the sensitivity analysis.
+# ---------------------------------------------------------------------------
+lambdas:
+  transport: 0.35
+  accommodation: 0.35
+  crowding: 0.30

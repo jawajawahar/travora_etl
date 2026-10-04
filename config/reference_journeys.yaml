@@ -1,0 +1,21 @@
+# Reference journey times used to calibrate and validate the train model.
+#
+# APPROXIMATE: typical station-to-station times of the faster regular services,
+# compiled from general knowledge of Sri Lanka Railways operations. They have
+# NOT been checked against the current official timetable. Before citing any
+# figure derived from them, verify each row at https://eservices.railway.gov.lk
+# (or the printed timetable), correct the minutes here, and re-run:
+#
+#     python -m etl.validate_transport
+#
+# Station names must match a station in data/processed/rail_graph.json.
+rail:
+  - {from: Colombo Fort, to: Kandy, minutes: 165}
+  - {from: Colombo Fort, to: Galle, minutes: 140}
+  - {from: Colombo Fort, to: Matara, minutes: 210}
+  - {from: Colombo Fort, to: Anuradhapura, minutes: 255}
+  - {from: Colombo Fort, to: Jaffna, minutes: 380}
+  - {from: Colombo Fort, to: Trincomalee, minutes: 465}
+  - {from: Colombo Fort, to: Batticaloa, minutes: 510}
+  - {from: Colombo Fort, to: Badulla, minutes: 600}
+  - {from: Kandy, to: Ella, minutes: 405}

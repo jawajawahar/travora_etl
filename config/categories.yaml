@@ -1,0 +1,99 @@
+# Travora category mapping: OSM tags -> 8 interest categories.
+# Rules are evaluated IN ORDER; the first match wins. Version-controlled so the
+# mapping is auditable and can be cited in the dissertation.
+#
+# Categories: heritage wildlife nature beach religious adventure cultural urban
+
+version: 1
+updated: 2026-08-16
+
+# Default dwell time (minutes) and fee (LKR) per category, used only when OSM
+# provides no value. Every imputed value is flagged in the output.
+defaults:
+  heritage:  {dwell_min: 120, open_min: 480,  close_min: 1050, fee_lkr: 3000}
+  wildlife:  {dwell_min: 240, open_min: 360,  close_min: 1080, fee_lkr: 6000}
+  nature:    {dwell_min: 90,  open_min: 0,    close_min: 1440, fee_lkr: 0}
+  beach:     {dwell_min: 150, open_min: 0,    close_min: 1440, fee_lkr: 0}
+  religious: {dwell_min: 60,  open_min: 300,  close_min: 1260, fee_lkr: 0}
+  adventure: {dwell_min: 180, open_min: 360,  close_min: 1020, fee_lkr: 2000}
+  cultural:  {dwell_min: 90,  open_min: 540,  close_min: 1020, fee_lkr: 1000}
+  urban:     {dwell_min: 60,  open_min: 540,  close_min: 1260, fee_lkr: 0}
+
+rules:
+  # --- wildlife: protected areas and parks ---
+  - category: wildlife
+    any:
+      - {key: boundary,  values: [protected_area, national_park]}
+      - {key: leisure,   values: [nature_reserve]}
+      - {key: tourism,   values: [zoo]}
+      - {key: protect_class, values: ["2", "4", "6"]}
+
+  # --- beach ---
+  - category: beach
+    any:
+      - {key: natural, values: [beach]}
+      - {key: leisure, values: [beach_resort]}
+
+  # --- heritage / archaeology ---
+  - category: heritage
+    any:
+      - {key: historic, values: [ruins, archaeological_site, castle, fort, monument, memorial, city_gate, tomb]}
+      - {key: tourism,  values: [museum]}
+      - {key: heritage, values: ["1", "2", "3"]}
+
+  # --- religious sites ---
+  # Sri Lanka has many thousands of small village shrines tagged
+  # amenity=place_of_worship. They are real places but not visitor
+  # destinations, and including all of them made religious sites 56% of the
+  # dataset. A corroborating signal is therefore required: heritage status, a
+  # Wikidata/Wikipedia entry, an explicit tourism tag, or a website.
+  - category: religious
+    any:
+      - {key: amenity,  values: [place_of_worship, monastery]}
+      - {key: building, values: [temple, church, mosque, cathedral, stupa]}
+      - {key: historic, values: [temple, wayside_shrine]}
+    require_any_key: [historic, heritage, wikidata, wikipedia, tourism, website, ref:whc]
+
+  # --- adventure ---
+  - category: adventure
+    any:
+      - {key: natural,  values: [peak, cave_entrance, cliff, volcano]}
+      - {key: sport,    values: [climbing, rafting, surfing, diving]}
+      - {key: tourism,  values: [wilderness_hut]}
+
+  # --- nature: specific named features are destinations in their own right ---
+  - category: nature
+    any:
+      - {key: waterway, values: [waterfall]}
+      - {key: natural,  values: [waterfall, spring, hot_spring]}
+      - {key: leisure,  values: [garden]}
+
+  # --- nature: generic land cover needs corroboration ---
+  # natural=wood and landuse=forest polygons are land cover, not attractions.
+  # Without this gate they contributed thousands of non-destinations.
+  - category: nature
+    any:
+      - {key: natural, values: [wood, water, wetland]}
+      - {key: leisure, values: [park]}
+      - {key: landuse, values: [forest]}
+    require_any_key: [tourism, wikidata, wikipedia, website, protect_class, boundary]
+
+  # --- cultural ---
+  - category: cultural
+    any:
+      - {key: tourism, values: [artwork, gallery, attraction, theme_park]}
+      - {key: amenity, values: [theatre, arts_centre]}
+      - {key: historic, values: [heritage]}
+
+  # --- urban viewpoints and markets ---
+  - category: urban
+    any:
+      - {key: tourism,   values: [viewpoint, information]}
+      - {key: amenity,   values: [marketplace]}
+      - {key: man_made,  values: [lighthouse, tower]}
+
+# Names matching these patterns are dropped as non-touristic noise.
+exclude_name_patterns:
+  - "^(bus|petrol|fuel|atm|toilet)"
+  - "^untitled"
+  - "^unnamed"

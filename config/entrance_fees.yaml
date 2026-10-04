@@ -1,0 +1,182 @@
+# Entrance fees for named sites, replacing category defaults where a source exists.
+#
+# Why this file exists: 2,236 of 2,245 places (99.6%) carried a category default
+# fee (every heritage site LKR 3,000, every wildlife site LKR 6,000), and the
+# budget was enforced against those invented numbers - Methodology 3.8.4 argues
+# against exactly that for opening hours.
+#
+# Fields (LKR unless marked _usd):
+#   foreign        foreign adult ticket
+#   foreign_child  foreign child (CCF "half ticket")
+#   saarc          SAARC-national adult, where published
+#   local          Sri Lankan adult, where published
+#   all_in_usd     national parks: entry + service charge + VAT per person,
+#                  excluding jeep hire, where a source gives it
+#   source         key into SOURCES below; confidence: official | secondary
+#   conflict       sources disagree; every figure is kept in `note`
+#
+# USD figures are converted at the CCF table's own rate, 334 LKR = 1 USD
+# (Sigiriya: USD 35.00 = LKR 11,690.00), so all rows share one rate. Prices
+# follow the exchange rate and can change by gazette; re-verify before use.
+#
+# `match` lists name fragments used to find the place in the knowledge graph;
+# `district` narrows the match. Matching is reviewed before anything is written.
+
+usd_to_lkr: 334
+accessed: 2026-09-27
+
+sources:
+  ccf:
+    title: Central Cultural Fund - Prices of the Tickets for Archeological Sites and Museums (all-inclusive with 18% VAT)
+    url: https://ccf.gov.lk/ticket-issuance/  (table served from https://ccf.gov.lk/is/index.php)
+    file: data/references/entrance_fees/01_ccf_ticket_prices_2026-09-27.html
+    confidence: official
+    visitor: foreign (non-SAARC)
+  slvoyo:
+    title: Sri Lanka Entrance (Ticket) Fees for Foreign Tourists (2026 Updated Prices)
+    url: https://slvoyo.com/complete-guide-to-sri-lanka-entrance-fees-for-foreign-tourists-2026-updated-prices/
+    updated: 2026-04-03
+    confidence: secondary
+  tuktukrental:
+    title: Entrance Fees Sri Lanka 2025-2026 - Full Ticket Price List
+    url: https://tuktukrental.com/sri-lanka-entrance-fees/
+    updated: 2026-03-30 (states 319 LKR per USD)
+    confidence: secondary
+  hopscotch:
+    title: Entrance Fees for Sri Lanka's Top Attractions (2026 Guide)
+    url: https://hopscotchtravels.com/entrance-fees-for-sri-lankas-top-attractions-2026-guide/
+    updated: 2025-09-23
+    confidence: secondary
+
+fees:
+  # ---- Central Cultural Fund (official) --------------------------------------
+  - name: Sigiriya
+    match: ["sigiriya"]
+    exclude: ["museum"]
+    district: Matale
+    foreign: 11690
+    foreign_child: 6680
+    saarc: 6680          # USD 20 (slvoyo, tuktukrental)
+    local: 120           # hopscotch; unverified
+    source: ccf
+  - name: Polonnaruwa ancient city
+    match: ["polonnaruwa ancient", "polonnaruwa sacred", "gal vihara", "parakrama", "vatadage"]
+    district: Polonnaruwa
+    foreign: 10020
+    foreign_child: 5010
+    local: 120           # hopscotch; unverified
+    source: ccf
+  - name: Anuradhapura sacred city
+    match: ["anuradhapura sacred", "jetavanaramaya", "jethawanaramaya", "abhayagiri", "ruwanwelisaya", "thuparamaya"]
+    district: Anuradhapura
+    foreign: 10020
+    foreign_child: 5010
+    local: 120           # hopscotch; unverified
+    source: ccf
+    note: One ticket covers the sacred area (tuktukrental). Jaya Sri Maha Bodhi itself is a place of worship.
+  - {name: Galle museum, match: ["national museum galle", "galle national museum", "galle museum"], district: Galle, foreign: 2004, foreign_child: 1002, source: ccf}
+  - {name: Kataragama museum, match: ["kataragama museum", "katharagama museum"], district: Monaragala, foreign: 2004, foreign_child: 1002, source: ccf}
+  - {name: Sigiriya museum, match: ["sigiriya museum"], district: Matale, foreign: 2004, source: ccf}
+  - {name: Dambulla museum, match: ["dambulla museum"], district: Matale, foreign: 1002, foreign_child: 501, source: ccf}
+  - {name: Ritigala, match: ["ritigala"], district: Anuradhapura, foreign: 2004, foreign_child: 1002, source: ccf}
+  - {name: Kandy Medawasala, match: ["medawasala", "medawala"], district: Kandy, foreign: 501, source: ccf}
+  - {name: Ramba Viharaya, match: ["ramba"], district: Hambantota, foreign: 1002, foreign_child: 501, source: ccf}
+  - {name: Buduruwagala, match: ["buduruwagala"], district: Monaragala, foreign: 1002, foreign_child: 501, source: ccf}
+  - {name: Ibbankatuwa megalithic site, match: ["ibbankatuwa", "lbbankatuwa"], district: Matale, foreign: 1002, foreign_child: 501, source: ccf}
+  - {name: Namal Uyana, match: ["namal uyana"], foreign: 2004, foreign_child: 1002, source: ccf,
+     note: "Not the 'Na Uyana Monastery' in Kurunegala, which is a different place."}
+  - {name: Jaffna fort, match: ["jaffna fort"], district: Jaffna, foreign: 1670, foreign_child: 835, source: ccf}
+  - {name: Lahugala, match: ["lahugala"], district: Ampara, foreign: 1002, foreign_child: 501, source: ccf}
+  - {name: Rathugala, match: ["rathugala"], district: Ampara, foreign: 1002, foreign_child: 501, source: ccf}
+
+  # ---- Secondary sources ------------------------------------------------------
+  - name: Temple of the Sacred Tooth Relic
+    match: ["temple of the sacred tooth", "temple of the tooth", "sri dalada maligawa", "dalada maligawa"]
+    district: Kandy
+    foreign: 2000
+    saarc: 1500
+    local: 0
+    source: tuktukrental
+    note: "Rs 2,000 (tuktukrental, hopscotch); US$6 = 2,004 (slvoyo); free for Sri Lankans with NIC (hopscotch)."
+  - name: Dambulla cave temple
+    match: ["dambulla cave", "dambulla royal cave", "rangiri dambulla", "dambulla raja maha"]
+    district: Matale
+    foreign: 2004
+    local: 120
+    source: hopscotch
+    conflict: true
+    note: "US$5 = 1,670 (slvoyo); US$6 = 2,004 (hopscotch); Rs 3,000 (tuktukrental). Middle value used."
+  - name: Colombo national museum
+    match: ["national museum of colombo", "colombo national museum"]
+    district: Colombo
+    foreign: 2004
+    foreign_child: 835
+    local: 150
+    source: hopscotch
+    conflict: true
+    note: "US$6 (hopscotch); US$5 adult / US$2.50 child (slvoyo)."
+  - name: Galle fort (ramparts and streets)
+    match: ["galle fort"]
+    exclude: ["museum", "hotel", "villa"]
+    district: Galle
+    foreign: 0
+    source: tuktukrental
+    conflict: true
+    note: "Walking the fort is free; the fee applies to the history museum only (tuktukrental). slvoyo lists US$3 for Swart Bastion and galleries."
+  - {name: Mihintale, match: ["mihintale"], district: Anuradhapura, foreign: 1000, source: tuktukrental,
+     note: "Rs 1,000 (tuktukrental); US$3 = 1,002 (slvoyo)."}
+  - {name: Pidurangala, match: ["pidurangala"], district: Matale, foreign: 1000, source: tuktukrental}
+  - {name: Ambuluwawa, match: ["ambuluwawa"], district: Kandy, foreign: 2000, source: tuktukrental, conflict: true,
+     note: "Rs 2,000 (tuktukrental); US$9 adult / US$5 child (slvoyo)."}
+  - {name: Yapahuwa, match: ["yapahuwa"], district: Kurunegala, foreign: 2000, source: tuktukrental}
+  - {name: Avukana Buddha, match: ["avukana", "aukana"], district: Anuradhapura, foreign: 1000, source: tuktukrental}
+  - {name: Isurumuniya, match: ["isurumuni"], district: Anuradhapura, foreign: 1000, source: tuktukrental}
+  - {name: Embekke Devalaya, match: ["embekke"], district: Kandy, foreign: 750, source: tuktukrental}
+  - {name: Mulkirigala, match: ["mulkirigala"], district: Hambantota, foreign: 500, source: tuktukrental}
+  - {name: Railway museum Kadugannawa, match: ["railway museum"], district: Kegalle, foreign: 500, source: tuktukrental}
+  - {name: Richmond Castle, match: ["richmond castle"], district: Kalutara, foreign: 1000, source: tuktukrental}
+  - {name: Lotus Tower, match: ["lotus tower"], district: Colombo, foreign: 6680, source: slvoyo, note: "US$20 (slvoyo, tuktukrental)."}
+  - {name: Helga's Folly, match: ["helga"], district: Kandy, foreign: 1670, source: tuktukrental}
+  - name: Pinnawala elephant orphanage
+    match: ["pinnawala elephant", "elephant orphanage"]
+    district: Kegalle
+    foreign: 5010
+    local: 295
+    source: hopscotch
+    conflict: true
+    note: "US$15 (hopscotch); US$17 (slvoyo)."
+  - {name: Royal Botanic Gardens Peradeniya, match: ["peradeniya"], district: Kandy, foreign: 3540, foreign_child: 2338, source: tuktukrental,
+     note: "Rs 3,540 (tuktukrental); US$11 adult / US$7 child (slvoyo)."}
+  - {name: Hakgala botanical garden, match: ["hakgala botanical", "hakgala garden"], district: Nuwara Eliya, foreign: 3540, foreign_child: 2338, source: tuktukrental}
+  - {name: Victoria Park Nuwara Eliya, match: ["victoria park"], district: Nuwara Eliya, foreign: 668, source: slvoyo}
+  - {name: Gangaramaya temple, match: ["gangaramaya"], district: Colombo, foreign: 6680, source: slvoyo, conflict: true,
+     note: "US$20 appears only in slvoyo; treat as unconfirmed."}
+  - {name: Ella Rock, match: ["ella rock"], district: Badulla, foreign: 1002, source: slvoyo, conflict: true,
+     note: "US$3 appears only in slvoyo; the hike is usually described as free."}
+  - {name: Nine Arch Bridge, match: ["nine arch", "demodora"], district: Badulla, foreign: 0, source: tuktukrental}
+  - {name: Sinharaja forest reserve, match: ["sinharaja"], foreign: 5010, source: tuktukrental, note: "US$15, tracker included."}
+  - {name: Udawattakele forest, match: ["udawatta", "udawattekele"], district: Kandy, foreign: 570, source: tuktukrental}
+  - {name: Pitawala Pathana, match: ["pitawala"], district: Matale, foreign: 975, source: tuktukrental}
+  - {name: Kanneliya forest, match: ["kanneliya"], district: Galle, foreign: 700, source: tuktukrental}
+  - {name: Ridiyagama safari park, match: ["ridiyagama"], district: Hambantota, foreign: 3000, source: tuktukrental}
+  - {name: Hurulu eco park, match: ["hurulu"], district: Anuradhapura, foreign: 3340, source: slvoyo}
+  - {name: Udawalawe elephant transit home, match: ["elephant transit"], district: Ratnapura, foreign: 1670, source: tuktukrental}
+
+  # ---- National parks: entry per foreign adult; jeep hire extra ---------------
+  - {name: Yala national park, match: ["yala national", "ruhuna national"], foreign: 8350, saarc: 6680, local: 100, all_in_usd: 45, source: slvoyo,
+     note: "Entry US$25 (all three sources); all-in ~US$45 (tuktukrental); local LKR 100 (hopscotch)."}
+  - {name: Wilpattu national park, match: ["wilpattu"], foreign: 8350, saarc: 6680, all_in_usd: 25, source: slvoyo, conflict: true,
+     note: "Entry US$25 (slvoyo); US$15 entry, ~US$25 all-in (tuktukrental)."}
+  - {name: Udawalawe national park, match: ["udawalawe national", "uda walawe national"], foreign: 5010, local: 100, all_in_usd: 27, source: tuktukrental, conflict: true,
+     note: "Entry US$15, all-in ~US$27 (tuktukrental); US$42-44 including fees (slvoyo, hopscotch)."}
+  - {name: Minneriya national park, match: ["minneriya"], foreign: 8350, saarc: 6680, all_in_usd: 35, source: slvoyo}
+  - {name: Kaudulla national park, match: ["kaudulla"], foreign: 8350, saarc: 6680, all_in_usd: 35, source: slvoyo}
+  - {name: Kumana national park, match: ["kumana national"], foreign: 8350, all_in_usd: 65, source: tuktukrental,
+     note: "US$25 (tuktukrental); US$27 (slvoyo)."}
+  - {name: Horton Plains national park, match: ["horton plains"], foreign: 8350, saarc: 6680, local: 100, all_in_usd: 40, source: slvoyo,
+     note: "Entry US$25; all-in ~US$40 (tuktukrental); US$41-75 including fees (hopscotch)."}
+  - {name: Wasgamuwa national park, match: ["wasgamuwa"], foreign: 8350, all_in_usd: 35, source: tuktukrental}
+  - {name: Lunugamvehera national park, match: ["lunugamvehera"], foreign: 5010, all_in_usd: 25, source: tuktukrental}
+  - {name: Bundala national park, match: ["bundala"], foreign: 4008, all_in_usd: 20, source: tuktukrental}
+  - {name: Maduru Oya national park, match: ["maduru oya"], foreign: 4008, all_in_usd: 20, source: tuktukrental}
+  - {name: Pigeon Island national park, match: ["pigeon island"], district: Trincomalee, foreign: 8350, saarc: 6680, source: slvoyo}
